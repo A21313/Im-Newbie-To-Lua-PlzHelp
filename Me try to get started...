@@ -1,1 +1,51 @@
-print(hello world)
+const canvas = document.querySelector('#color-wheel');
+const ctx = canvas.getContext('2d');
+const wheelSize = 200;
+
+canvas.width = wheelSize;
+canvas.height = wheelSize;
+
+function drawWheel() {
+  const centerX = wheelSize / 2;
+  const centerY = wheelSize / 2;
+  const radius = wheelSize / 2;
+
+  for (let angle = 0; angle < 360; angle++) {
+    const radians = angle * Math.PI / 180;
+    const x = centerX + radius * Math.cos(radians);
+    const y = centerY + radius * Math.sin(radians);
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+
+    gradient.addColorStop(0, `hsl(${angle}, 100%, 50%)`);
+    gradient.addColorStop(1, 'white');
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, radians, radians + Math.PI / 180, false);
+    ctx.lineTo(centerX, centerY);
+    ctx.fill();
+  }
+
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+  ctx.stroke();
+}
+
+function setColor(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const imageData = ctx.getImageData(x, y, 1, 1);
+  const color = `rgb(${imageData.data[0]}, ${imageData.data[1]}, ${imageData.data[2]})`;
+  document.body.style.backgroundColor = color;
+}
+
+drawWheel();
+canvas.addEventListener('mousedown', setColor);
+canvas.addEventListener('mousemove', (event) => {
+  if (event.buttons === 1) {
+    setColor(event);
+  }
+});
